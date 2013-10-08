@@ -187,7 +187,9 @@ $(document).ready(function(){
 						}else{
 								move(0,1,0);
 						}*/
-						eachBl
+						eachblock(game.piece,game.LocX,game.LocY,game.rot,function(x,y){
+								
+						})
 						if(!testMove(0,1,0)){
 								game.locY = 0;
 								game.locX = 3;
