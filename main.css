@@ -1,0 +1,31 @@
+*{
+		text-align:center;
+		margin-left:auto;
+		margin-right:auto;
+}
+body{
+		color:#fff;
+		background-color:#000;
+}
+
+#title{
+		text-align:center
+}
+
+#screen{
+		border: 1px solid white;
+}
+
+.screen-block{
+		border: 1px solid white;
+		width: 20px;
+		height: 20px;
+		display: inline-block;
+}
+
+.screen-row{
+		line-height: 0;
+		display:block;
+		border: 0px;
+		margin: 0px;
+}
