@@ -51,13 +51,15 @@ $(document).ready(function(){
 				}
 		};
 
-		function getBlock(x,y){ game.screen[y][x].occupied }
+		game.getBlock = function(x,y){ return game.screen[y][x].occupied }
 		
 		function occupied(type, x, y, dir) {
 				var result = false
 				eachblock(type, x, y, dir, function(x, y) {
-						if ((x < 0) || (x >= nx) || (y < 0) || (y >= ny) || getBlock(x,y))
+						if ((x < 0) || (x >= game.width) || (y < 0) || (y >= game.height) || game.getBlock(x,y)){
 								result = true;
+								//console.log("collision",x,y);
+						}
 				});
 				return result;
 		};
@@ -66,6 +68,9 @@ $(document).ready(function(){
 				return !occupied(type, x, y, dir);
 		};
 		
+		function random(min, max){ 
+				return (min + (Math.random() * (max - min)));
+		}
 		var pieces = [];
 		function randomPiece() {
 				if (pieces.length == 0)
@@ -83,17 +88,16 @@ $(document).ready(function(){
 				 LEFT:2,
 				 RIGHT:3,
 				 PAUSE:4,
-				 I:5,
-				 J:6,
-				 L:7,
-				 O:8,
-				 S:9,
-				 T:10,
-				 Z:11};
-		var paused = false;
-		var rot  =  0;
-		var locX = -1;
-		var locY = -1;
+				 ROTLEFT:5,
+				 ROTRIGHT:6,
+				 SPEEDUP:7,
+				 SPEEDDOWN:8};
+		game.paused = false;
+		game.pause = function(){game.paused = !game.paused};
+		game.rot  =  0;
+		game.locX = -1;
+		game.locY = -1;
+		game.speed = 1;
 		game.piece = randomPiece();
 		game.next  = randomPiece();
 		
@@ -101,28 +105,98 @@ $(document).ready(function(){
 				game.piece = game.next;
 				game.next  = randomPiece();
 		}
-		function erase(piece,x,y,rot){
+
+		function set(piece,x,y,rot,yes){ //yes is a variable I don't feel like explaining figure it out
 				eachblock(piece,x,y,rot,function(x,y){
-						game.screen[y][x].
+						var spot = game.screen[y][x];
+						spot.occupied = yes;
+						spot.update(yes ? piece.color : 'inherit');
 				})
 		}
+		function erase(a,b,c,d){set(a,b,c,d,false)}
+		function write(a,b,c,d){set(a,b,c,d,true)}
+		
+		function move(x,y,rotChange){
+				erase(game.piece,game.locX,game.locY,game.rot);
+				game.locX += x;
+				game.locY += y;
+				game.rot  += rotChange;
+				game.rot = game.rot%4;
+				write(game.piece,game.locX,game.locY,game.rot);
+		}
+		
+		function testMove(x,y,rotc){
+				if(!occupied(game.piece,game.locX+x,game.locY+y,game.rot+rotc)){
+						move(x,y,rotc);
+						return true;
+				}
+				return false;
+		}
+		
+		game.testMove = testMove
+				
 		function mainLoop(){ //main loop, drop pieces etc
-				if(!paused){
-						if(locX == -1 && loxY == -1){
+				var event
+				while(event = events.pop()){
+						e = EventTypes;
+						switch(event){
+						case e.UP:
+								testmove(0,-1,0);
+								break;
+						case e.LEFT:
+								testmove(-1,0,0);
+								break;
+						case e.RIGHT:
+								testmove(1,0,0);
+								break;
+						case e.DOWN:
+								testmove(0,1,0);
+								break;
+						case e.ROTRIGHT:
+								testmove(0,0,1);
+								break;
+						case e.ROTLEFT:
+								testmove(0,0,-1);
+								break;
+						case e.PAUSE:
+								game.paused = !game.paused;
+						case e.SPEEDUP:
+								game.speed += 0.5;
+								break;
+						case e.SPEEDDOWN:
+								game.speed -= 0.5;
+								if(game.speed <= 0){game.speed = 0.5}
+								break;
+						default:
+								//uhhh
+						}
+				}
+				if(!game.paused){
+						if(game.locX == -1 && game.locY == -1){
 								//starting, place random piece at the top
-								locY = 0;
-								locX = 3;
-								rot  = 2;
+								game.locY = 0;
+								game.locX = 3;
+								game.rot  = 2;
 								nextPiece();
 						}
-						if(occupied(game.piece,locX,locY+1,rot)){
-								locY = 0;
-								locX = 3;
+						/*if(occupied(game.piece,game.locX,game.locY+1,rot)){
+								game.locY = 0;
+								game.locX = 3;
 								rot  = 2;
 								nextPiece();
 						}else{
-								
+								move(0,1,0);
+						}*/
+						if(!testMove(0,1,0)){
+								game.locY = 0;
+								game.locX = 3;
+								game.rot = 2;
+								nextPiece();
+						}
+				}
+				setTimeout(mainLoop,(1.0/game.speed)*1000)
 		}
 		mainLoop();
+		//game.paused = true;
 		
 })
