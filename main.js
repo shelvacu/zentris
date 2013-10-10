@@ -81,7 +81,7 @@ $(document).ready(function(){
 
 		//something?
 		
-		var events = [];
+		game.events = [];
 		var EventTypes = 
 				{UP:0,
 				 DOWN:1,
@@ -122,44 +122,114 @@ $(document).ready(function(){
 				game.locY += y;
 				game.rot  += rotChange;
 				game.rot = game.rot%4;
+				if(game.rot < 0)
+						game.rot = 4 + game.rot;
 				write(game.piece,game.locX,game.locY,game.rot);
 		}
 		
 		function testMove(x,y,rotc){
+				eachblock(game.piece,game.locX,game.locY,game.rot,function(x,y){
+						game.screen[y][x].occupied = false;
+				})
+				var ret = false
 				if(!occupied(game.piece,game.locX+x,game.locY+y,game.rot+rotc)){
 						move(x,y,rotc);
-						return true;
+						ret = true;
 				}
-				return false;
+				eachblock(game.piece,game.locX,game.locY,game.rot,function(x,y){
+						game.screen[y][x].occupied = true;
+				})
+				return ret;
 		}
 		
 		game.testMove = testMove
+		
+		function checkForLines(){
+				var linescleared = [];
+				for(var i=0;i<game.screen.length;i++){
+						var row = game.screen[i];
+						var all = true;
+						for(var j=0;j<row.length;j++){
+								if(!row[j].occupied){
+										all = false;
+										break;
+								}
+						}
+						if(all){
+								linescleared.push(i);
+						}
+						linescleared = linescleared.sort(function(a,b){return a-b;});
+				}
+				console.log(linescleared);
+				for(var i=0;i<linescleared.length;i++){
+						var lineNum = linescleared[i];
+						console.log('clearing',lineNum,'i',i,'length',linescleared.length);
+						//TODO: add a score
+						for(var j=lineNum;j>0;j--){
+								var row = game.screen[j];
+								var prevRow = game.screen[j-1];
+								//console.log('moving row',j-1,'to',j);
+								for(var z=0;z<row.length;z++){
+										row[z].update(prevRow[z].color);
+										row[z].occupied = prevRow[z].occupied;
+								}
+						}
+						var last = game.screen[0]
+						for(var k=0;k<last.length;k++){
+								last[k].update("inherit");
+								last[k].occupied = false;
+						}
+				}
+		}
 				
 		function mainLoop(){ //main loop, drop pieces etc
+				if(!game.paused){
+						if(game.locX == -1 && game.locY == -1){
+								//starting, place random piece at the top
+								game.locY = 0;
+								game.locX = 3;
+								game.rot  = 2;
+								nextPiece();
+						}
+						if(!testMove(0,1,0)){
+								game.locY = 0;
+								game.locX = 3;
+								game.rot  = 2;
+								nextPiece();
+								checkForLines();
+						}
+				}
+				setTimeout(mainLoop,(1.0/game.speed)*1000)
+		}
+		mainLoop();
+
+		function inputLoop(){
 				var event
-				while(event = events.pop()){
+				while((event = game.events.pop()) != undefined){
+						//console.log(event);
 						e = EventTypes;
 						switch(event){
 						case e.UP:
-								testmove(0,-1,0);
+								game.testMove(0,-1,0);
 								break;
 						case e.LEFT:
-								testmove(-1,0,0);
+								game.testMove(-1,0,0);
 								break;
 						case e.RIGHT:
-								testmove(1,0,0);
+								game.testMove(1,0,0);
 								break;
 						case e.DOWN:
-								testmove(0,1,0);
+								game.testMove(0,1,0);
 								break;
 						case e.ROTRIGHT:
-								testmove(0,0,1);
+								game.testMove(0,0,1);
 								break;
 						case e.ROTLEFT:
-								testmove(0,0,-1);
+								game.testMove(0,0,-1);
 								break;
 						case e.PAUSE:
 								game.paused = !game.paused;
+								break;
 						case e.SPEEDUP:
 								game.speed += 0.5;
 								break;
@@ -169,34 +239,49 @@ $(document).ready(function(){
 								break;
 						default:
 								//uhhh
+								console.log('invalid event:',event)
 						}
 				}
-				if(!game.paused){
-						if(game.locX == -1 && game.locY == -1){
-								//starting, place random piece at the top
-								game.locY = 0;
-								game.locX = 3;
-								game.rot  = 2;
-								nextPiece();
-						}
-						/*if(occupied(game.piece,game.locX,game.locY+1,rot)){
-								game.locY = 0;
-								game.locX = 3;
-								rot  = 2;
-								nextPiece();
-						}else{
-								move(0,1,0);
-						}*/
-						if(!testMove(0,1,0)){
-								game.locY = 0;
-								game.locX = 3;
-								game.rot = 2;
-								nextPiece();
-						}
-				}
-				setTimeout(mainLoop,(1.0/game.speed)*1000)
+				setTimeout(inputLoop,10);
 		}
-		mainLoop();
+		inputLoop();
+				
+		$('html').keydown(function(e){
+				var v = EventTypes;
+				var events = game.events;
+				switch(e.which){
+				case 87: //W
+						events.push(v.UP);
+						break;
+				case 65: //A
+						events.push(v.LEFT);
+						break;
+				case 83: //S
+						events.push(v.DOWN);
+						break;
+				case 68: //D
+						events.push(v.RIGHT);
+						break;
+				case 81: //Q
+						events.push(v.ROTLEFT);
+						break;
+				case 69: //E
+						events.push(v.ROTRIGHT);
+						break;
+				case 32: //SPACE
+						events.push(v.PAUSE);
+						break;
+				case 187: //+
+						events.push(v.SPEEDUP);
+						break;
+				case 189: //-
+						events.push(v.SPEEDDOWN);
+						break;
+				default:
+						console.log(e.which);
+				}
+		});
+		
 		//game.paused = true;
 		
 })

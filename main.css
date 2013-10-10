@@ -17,7 +17,7 @@ body{
 }
 
 .screen-block{
-		border: 1px solid white;
+		border: 1px solid #333;
 		width: 20px;
 		height: 20px;
 		display: inline-block;
