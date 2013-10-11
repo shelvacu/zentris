@@ -74,8 +74,9 @@ $(document).ready(function(){
 		var pieces = [];
 		function randomPiece() {
 				if (pieces.length == 0)
-						pieces = [i,i,i,i,j,j,j,j,l,l,l,l,o,o,o,o,s,s,s,s,t,t,t,t,z,z,z,z];
-				var type = pieces.splice(random(0, pieces.length-1), 1)[0]; // remove a single piece
+						pieces = [i,i,j,j,l,l,o,o,s,s,t,t,z,z];
+				var type = pieces.splice(random(0, pieces.length-1), 1)[0]; 
+				// remove a single piece
 				return type;
 		};
 
@@ -126,16 +127,24 @@ $(document).ready(function(){
 						game.rot = 4 + game.rot;
 				write(game.piece,game.locX,game.locY,game.rot);
 		}
+		game.move = move;
 		
 		function testMove(x,y,rotc){
+				if(rotc < 0)
+						rotc = 4+rotc%4;
 				eachblock(game.piece,game.locX,game.locY,game.rot,function(x,y){
-						game.screen[y][x].occupied = false;
+						if(game.screen[y] && game.screen[y][x])
+								game.screen[y][x].occupied = false;
 				})
-				var ret = false
-				if(!occupied(game.piece,game.locX+x,game.locY+y,game.rot+rotc)){
+				var ret = false;
+				var toX = game.locX+x;
+				var toY = game.locY+y;
+				var toRot = game.rot+rotc%4;
+				if(!occupied(game.piece,game.locX+x,game.locY+y,(game.rot+rotc)%4)){
 						move(x,y,rotc);
 						ret = true;
 				}
+				//console.log(toX,toY,toRot,ret);
 				eachblock(game.piece,game.locX,game.locY,game.rot,function(x,y){
 						game.screen[y][x].occupied = true;
 				})
@@ -250,15 +259,19 @@ $(document).ready(function(){
 				var v = EventTypes;
 				var events = game.events;
 				switch(e.which){
+				case 38: //up arrow key
 				case 87: //W
 						events.push(v.UP);
 						break;
+				case 37: //left
 				case 65: //A
 						events.push(v.LEFT);
 						break;
+				case 40: //down
 				case 83: //S
 						events.push(v.DOWN);
 						break;
+				case 39: //right
 				case 68: //D
 						events.push(v.RIGHT);
 						break;
