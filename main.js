@@ -259,7 +259,6 @@ $(document).ready(function(){
 				var v = EventTypes;
 				var events = game.events;
 				switch(e.which){
-				case 38: //up arrow key
 				case 87: //W
 						events.push(v.UP);
 						break;
@@ -275,6 +274,7 @@ $(document).ready(function(){
 				case 68: //D
 						events.push(v.RIGHT);
 						break;
+				case 38: //up arrow key
 				case 81: //Q
 						events.push(v.ROTLEFT);
 						break;
