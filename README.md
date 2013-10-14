@@ -5,10 +5,12 @@ Zentris, a shortened version of Zen Tetris, is tetris with all stress removed. I
 
 Controls:
 
-* WASD move around the screen
-* Q/E rotate (counter)clockwise
-* +/- increase/decrease speed
-* SPACE pause/play (blocks can still be moved, but they stop falling)
+* **WASD** move around the screen
+* **Q** / **E** rotate (counter)clockwise
+* **+** / **-** increase/decrease speed
+* **P** pause/play (blocks can still be moved, but they stop falling)
+* **R** "random" gives a new piece
+* **SPACE** drop piece
 
 Classic controls are also availible, use arrow keys, up rotates.
 

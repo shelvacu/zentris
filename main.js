@@ -92,7 +92,10 @@ $(document).ready(function(){
 				 ROTLEFT:5,
 				 ROTRIGHT:6,
 				 SPEEDUP:7,
-				 SPEEDDOWN:8};
+				 SPEEDDOWN:8,
+				 CHANGE:9,
+				 DROP:10
+				};
 		game.paused = false;
 		game.pause = function(){game.paused = !game.paused};
 		game.rot  =  0;
@@ -190,21 +193,25 @@ $(document).ready(function(){
 						}
 				}
 		}
+		game.checkForLines = checkForLines;
+		
+		function newPiece(){
+				game.locY = 0;
+				game.locX = 3;
+				game.rot  = 2;
+				nextPiece();
+				write(game.piece,game.locX,game.locY,game.rot);
+		}
+		game.newPiece = newPiece;
 				
 		function mainLoop(){ //main loop, drop pieces etc
 				if(!game.paused){
 						if(game.locX == -1 && game.locY == -1){
 								//starting, place random piece at the top
-								game.locY = 0;
-								game.locX = 3;
-								game.rot  = 2;
-								nextPiece();
+								newPiece();
 						}
 						if(!testMove(0,1,0)){
-								game.locY = 0;
-								game.locX = 3;
-								game.rot  = 2;
-								nextPiece();
+								newPiece();
 								checkForLines();
 						}
 				}
@@ -246,6 +253,15 @@ $(document).ready(function(){
 								game.speed -= 0.5;
 								if(game.speed <= 0){game.speed = 0.5}
 								break;
+						case e.CHANGE:
+								erase(game.piece,game.locX,game.locY,game.rot);
+								newPiece();
+								break;
+						case e.DROP:
+								while(testMove(0,1,0)){};
+								checkForLines();
+								newPiece();
+								break;
 						default:
 								//uhhh
 								console.log('invalid event:',event)
@@ -282,7 +298,7 @@ $(document).ready(function(){
 						events.push(v.ROTRIGHT);
 						break;
 				case 32: //SPACE
-						events.push(v.PAUSE);
+						events.push(v.DROP);
 						break;
 				case 187: //+
 						events.push(v.SPEEDUP);
@@ -290,8 +306,14 @@ $(document).ready(function(){
 				case 189: //-
 						events.push(v.SPEEDDOWN);
 						break;
+				case 82: //R
+						events.push(v.CHANGE);
+						break;
+				case 80: //P
+						events.push(v.PAUSE);
+						break;
 				default:
-						console.log(e.which);
+						console.log('unused event:',e.which);
 				}
 		});
 		

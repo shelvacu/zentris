@@ -3,7 +3,7 @@
 <html>
 	<head>
 		<title>Zentris</title>
-		<script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js" >
+		<script src="jquery.min.js" >
 		</script>
 		<script type="text/javascript" src="main.js"></script>
 		<link rel="stylesheet" href="main.css">
