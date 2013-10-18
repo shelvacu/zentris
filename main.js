@@ -290,10 +290,10 @@ $(document).ready(function(){
 				case 68: //D
 						events.push(v.RIGHT);
 						break;
-				case 38: //up arrow key
 				case 81: //Q
 						events.push(v.ROTLEFT);
 						break;
+				case 38: //up arrow key
 				case 69: //E
 						events.push(v.ROTRIGHT);
 						break;
