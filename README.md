@@ -16,4 +16,4 @@ Classic controls are also availible, use arrow keys, up rotates.
 
 Play here: [zentris.shelvacu.com](http://zentris.shelvacu.com/)
 
-NOTE: This does NOT require php. The file named "index.php" is for compatability with heroku. It's plain html. It may be played statically, but jQuery won't load correctly if accessed from a file:/// url.
+NOTE: This does NOT require php. The file named "index.php" is for compatability with heroku. It's plain html, and may be played statically.
